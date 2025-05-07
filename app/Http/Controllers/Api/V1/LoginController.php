@@ -36,7 +36,13 @@ class LoginController extends Controller
         return response()->json(
             ['status'=>'loggedIn',
             'message'=>'user logged in',
-            'data'=>$user,
+            'data'=>[
+                'id'=>$user['id'],
+                'firstName'=>$user['first_name'],
+                'lastName'=>$user['last_name'],
+                'email'=>$user['email'],
+                'phoneNumber'=>$user['phone_number'],
+            ],
             ]
 
         );

@@ -37,7 +37,13 @@ class RegisterController extends Controller
         return response()->json([
             'status' => 'success',
             'message' => 'user created successfully',
-            'data' =>$createdUser,
+            'data' =>[
+                'id'=>$createdUser['id'],
+                'firstName'=>$createdUser['first_name'],
+                'lastName'=>$createdUser['last_name'],
+                'email'=>$createdUser['email'],
+                'phoneNumber'=>$createdUser['phone_number'],
+            ],
         ]);
     }
 }
