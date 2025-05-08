@@ -9,21 +9,9 @@ use Illuminate\Support\Facades\Hash;
 class RegisterController extends Controller
 {
 
-    public function index(){
-        $users = User::all();
-        return response()->json([
-            'status'=>'success',
-            'message'=>'all users got',
-            'data'=>$users,
-        ]);
-    }
-
-
-     
-
-
     public function store(RegisterRequest $request)
     {
+        logger('start register');
           $user= $request->validated();
         
         $createdUser = User::create([
@@ -33,8 +21,8 @@ class RegisterController extends Controller
             'phone_number'=>$user['phoneNumber'],
             'password' => Hash::make($user['password']),
         ]);
-        Auth::login($createdUser);
-        return response()->json([
+        if($createdUser){
+            return response()->json([
             'status' => 'success',
             'message' => 'user created successfully',
             'data' =>[
@@ -44,6 +32,12 @@ class RegisterController extends Controller
                 'email'=>$createdUser['email'],
                 'phoneNumber'=>$createdUser['phone_number'],
             ],
+        ],201);
+        }
+        return response()->json([
+            'status'=>'failed',
+            'message'=>'user creation failed'
         ]);
+        
     }
 }

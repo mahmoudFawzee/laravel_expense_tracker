@@ -25,6 +25,7 @@ Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function(){
 });
 
 Route::prefix(API_VERSION)->group(function(){
+    
     Route::post('/register',[RegisterController::class,'store']);
 });
 
