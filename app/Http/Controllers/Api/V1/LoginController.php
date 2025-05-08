@@ -24,28 +24,34 @@ class LoginController extends Controller
      public function store(LoginRequest $request)
     {
         $credentials = $request->validated();
+        //?look for the email is in database
+        $gotUser = User::where('email', $request['email'])->first();
+        if($gotUser==null){
+            return response()->json(
+            ['status'=>'not found',
+            'message'=>'email does not exists',
+            
+            ],404);
+        }
+        
+        //?if yes check entered password
         $valid = Auth::attempt($credentials);
         if(!$valid){
-            return response()->json(['status'=>'forbidden',
-            'message'=>'invalid credentials',
+            return response()->json(
+            ['status'=>'forbidden',
+            'message'=>'password is wrong',
             
             ],403);
         }
 
         $user = Auth::user();
-        return response()->json(
-            ['status'=>'loggedIn',
-            'message'=>'user logged in',
-            'data'=>[
-                'id'=>$user['id'],
-                'firstName'=>$user['first_name'],
-                'lastName'=>$user['last_name'],
-                'email'=>$user['email'],
-                'phoneNumber'=>$user['phone_number'],
-            ],
-            ]
+         $token = $user->createToken('authToken')->plainTextToken;
 
-        );
+         return response()->json([
+        'access_token' => $token,
+        'token_type' => 'Bearer',
+        'user' => $user,
+    ]);
     }
 
     /**
@@ -67,8 +73,17 @@ class LoginController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
-    {
-        //
+    public function destroy()
+{
+    $user = Auth::user();
+
+    if ($user) {
+        $user->currentAccessToken()->delete(); // deletes the current token
     }
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'User logged out'
+    ]);
+}
 }

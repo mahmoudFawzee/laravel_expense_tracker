@@ -28,7 +28,7 @@ class RegisterRequest extends FormRequest
              'firstName'=>'required|string|min:3',
               'lastName'=>['required','min:5'],
               'email'=>['required','email'],
-              'phoneNumber'=>['required','min:11'],
+              'phoneNumber'=>['required','min:11','unique:Users,phone_number'],
              'password'=>['required','confirmed',Password::min(6)]
         ];
     }

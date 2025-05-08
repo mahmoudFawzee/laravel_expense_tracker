@@ -17,6 +17,13 @@ return new class extends Migration
             $table->foreignId('user_id');
             $table->timestamps();
         });
+
+        //?create pivot table for category_user
+        Schema::create('category_user',function(Blueprint $table){
+            $table->id();
+            $table->foreignIdFor(App\Models\User::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(App\Models\Category::class)->constrained()->cascadeOnDelete();
+        });
     }
 
     /**

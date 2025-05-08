@@ -10,4 +10,9 @@ class Category extends Model
     /** @use HasFactory<\Database\Factories\CategoryFactory> */
     use HasFactory;
     protected $guarded = [];
+
+
+    public function users()  {
+        return $this->belongsToMany(\App\Models\User::class);
+    }
 }

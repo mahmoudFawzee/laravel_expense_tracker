@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpenseRequest;
 use App\Models\Expense;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ExpenseController extends Controller
 {
@@ -14,6 +15,7 @@ class ExpenseController extends Controller
      */
     public function index()
     {
+
         return json_encode([
             'status' => 'success',
             'message' => 'Expenses retrieved successfully',
@@ -23,12 +25,13 @@ class ExpenseController extends Controller
    
     public function store(ExpenseRequest $request)
     {
+
         $expense = Expense::create([
             'name' => $request->input('name'),
             'amount' => $request->input('amount'),
             'description' => $request->input('description'),
-            'category_id' => $request->input('category_id'),
-            'user_id' => $request->input('user_id'),
+            'category_id' => $request->input('categoryId'),
+            'user_id' => Auth::user()->id,
         ]);
 
         return response()->json([
