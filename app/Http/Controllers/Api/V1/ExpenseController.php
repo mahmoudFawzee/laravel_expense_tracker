@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ExpenseRequest;
+use App\Http\Resources\ExpenseResource;
+use App\Models\Category;
 use App\Models\Expense;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,11 +17,11 @@ class ExpenseController extends Controller
      */
     public function index()
     {
-
-        return json_encode([
-            'status' => 'success',
-            'message' => 'Expenses retrieved successfully',
-            'data' => Expense::all()
+        $data =ExpenseResource::collection(Auth::user()->expenses);
+        return response()->json([
+            'status'=>'success',
+            'message'=>'expenses gotten',
+            'data'=>$data,
         ]);
     }
    
@@ -33,11 +35,14 @@ class ExpenseController extends Controller
             'category_id' => $request->input('categoryId'),
             'user_id' => Auth::user()->id,
         ]);
-
+        $category = Category::where('id',$expense->category_id)->first();
         return response()->json([
             'status' => 'success',
             'message' => 'Expense created successfully',
-            'data' => $expense
+            'data' => [
+                'expense'=>$expense,
+                'category'=>$category,
+            ],
         ]);
     }
 

@@ -15,6 +15,7 @@ Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function () {
 
 Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function(){
     Route::post('/expense',[ExpenseController::class,'store']);
+    Route::get('/expenses',[ExpenseController::class,'index']);
 });
 
 

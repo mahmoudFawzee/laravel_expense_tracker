@@ -49,6 +49,10 @@ class User extends Authenticatable
     }
 
     public function categories(){
-        return $this->belongsToMany(\App\Models\Category::class);
+        return $this->belongsToMany(Category::class);
+    }
+
+    public function expenses(){
+        return $this->hasMany(Expense::class);
     }
 }
