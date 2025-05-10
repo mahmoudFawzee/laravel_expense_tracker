@@ -42,5 +42,6 @@ Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function(){
     Route::get('/user',[UserController::class,'show']);
     Route::patch('/user',[UserController::class,'update']);
     Route::delete('user',[UserController::class,'destroy']);
+    Route::patch('/user/change-password',[UserController::class,'change_password']);
 });
 

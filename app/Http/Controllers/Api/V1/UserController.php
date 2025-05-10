@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class UserController extends Controller
 {
@@ -18,12 +19,12 @@ class UserController extends Controller
         return Hash::check( $enteredPassword,$password);
       }
 
-      private function failureState(string $message='something went wrong')
+      private function failureResponse(string $message='something went wrong')
        {
         return response()->json([
                 'status'=>'failure',
                 'message'=>$message,
-            ]);
+            ],422);
       }
 
       private function updateUserData(User $user,?string $email,?string $password)
@@ -31,12 +32,12 @@ class UserController extends Controller
         $emailChanged = $this->isEmailChanged($email);
         if($emailChanged){
             if($password==null){
-                return $this->failureState('password is required to change email');
+                return $this->failureResponse('password is required to change email');
             }
             $isRightPassword = $this->checkPassword($user->password,$password);
             
             if(!$isRightPassword){
-                return $this->failureState('Password is Wrong');
+                return $this->failureResponse('Password is Wrong');
             }
         }
         return null;
@@ -76,7 +77,7 @@ class UserController extends Controller
           $updated = $user->update($validated);
 
         if(!$updated){
-            return $this->failureState();
+            return $this->failureResponse();
         }
         $user->refresh();
         $updatedUser = new UserResource($user);
@@ -106,7 +107,7 @@ class UserController extends Controller
 
         $deleted = $user->delete();
         if(!$deleted){
-            return $this->failureState();
+            return $this->failureResponse();
         }
          return response()->json([
                 'status'=>'success',
@@ -115,6 +116,36 @@ class UserController extends Controller
     }
 
 
+    public function change_password(Request $request) {
+    
+        //?validate
+        $validated = $request->validate(
+            [
+            'oldPassword'=>['required',Password::min(6)],
+            'newPassword'=>['required','confirmed',Password::min(6)],
+            ]
+        );
+        $user = User::findOrFail(Auth::user()->id);
+        $rightPassword = $this->checkPassword($user->password,$validated['oldPassword']);
+        if(!$rightPassword){
+            return $this->failureResponse('old password is wrong');
+        }
+        $updatedPassword = $user->update(
+            [
+                'password'=>$validated['newPassword'],
+            ]
+        );
+        if(!$updatedPassword){
+            return $this->failureResponse();
+        }
 
+        Auth::user()->currentAccessToken()->delete(); // deletes the current token
+
+
+        return response()->json([
+            'status'=>'success',
+            'message'=>'password changed successfully'
+        ]);
+    }
   
 }
