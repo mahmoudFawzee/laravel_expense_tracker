@@ -3,8 +3,10 @@
 use App\Http\Controllers\Api\V1\ExpenseController;
 use App\Http\Controllers\Api\V1\LoginController;
 use App\Http\Controllers\Api\V1\RegisterController;
-use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Api\V1\CategoryController;
+use App\Http\Controllers\Api\V1\UserController;
 use Illuminate\Support\Facades\Route;
+use Laravel\Sanctum\Sanctum;
 
 const AUTH_SANCTUM = 'auth:sanctum';
 const API_VERSION = 'v1';
@@ -35,4 +37,10 @@ Route::prefix(API_VERSION)->group(function(){
     Route::post('/login',[LoginController::class,'store']);
 });
 
+
+Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function(){
+    Route::get('/user',[UserController::class,'show']);
+    Route::patch('/user',[UserController::class,'update']);
+    Route::delete('user',[UserController::class,'destroy']);
+});
 
