@@ -130,6 +130,7 @@ class UserController extends Controller
         if(!$rightPassword){
             return $this->failureResponse('old password is wrong');
         }
+        Auth::user()->currentAccessToken()->delete(); // deletes the current token
         $updatedPassword = $user->update(
             [
                 'password'=>$validated['newPassword'],
@@ -139,7 +140,7 @@ class UserController extends Controller
             return $this->failureResponse();
         }
 
-        Auth::user()->currentAccessToken()->delete(); // deletes the current token
+        
 
 
         return response()->json([

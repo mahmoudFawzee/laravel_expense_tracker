@@ -10,14 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
+ 
     /**
      * Store a newly created resource in storage.
      */
@@ -45,6 +38,11 @@ class LoginController extends Controller
         }
 
         $user = Auth::user();
+         if ($user) {
+        $user->tokens()->delete();
+    }
+        
+        
          $token = $user->createToken('authToken')->plainTextToken;
 
          return response()->json([
@@ -59,23 +57,7 @@ class LoginController extends Controller
         ],
     ]);
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(User $user)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, User $user)
-    {
-        //
-    }
-
+    
     /**
      * Remove the specified resource from storage.
      */
@@ -84,6 +66,7 @@ class LoginController extends Controller
     $user = Auth::user();
 
     if ($user) {
+        logger($user->currentAccessToken());
         $user->currentAccessToken()->delete(); // deletes the current token
     }
 
