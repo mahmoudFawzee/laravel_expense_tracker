@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -67,7 +66,7 @@ class LoginController extends Controller
 
     if ($user) {
         logger($user->currentAccessToken());
-        $user->currentAccessToken()->delete(); // deletes the current token
+        $user->tokens()->delete(); // deletes all tokens
     }
 
     return response()->json([
