@@ -22,7 +22,7 @@ Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function(){
 
 
 Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function(){
-    Route::post('/category',[CategoryController::class,'store']);
+    Route::post('/category/create',[CategoryController::class,'store']);
     Route::get('/categories',[CategoryController::class,'index']);
 });
 
@@ -40,8 +40,8 @@ Route::prefix(API_VERSION)->group(function(){
 
 Route::prefix(API_VERSION)->middleware(AUTH_SANCTUM)->group(function(){
     Route::get('/user',[UserController::class,'show']);
-    Route::patch('/user',[UserController::class,'update']);
-    Route::delete('user',[UserController::class,'destroy']);
-    Route::patch('/user/change-password',[UserController::class,'change_password']);
+    Route::patch('/user/update',[UserController::class,'update']);
+    Route::delete('user/delete',[UserController::class,'destroy']);
+    Route::patch('/user/change-password',[UserController::class,'changePassword']);
 });
 

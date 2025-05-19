@@ -13,7 +13,6 @@ class ExpenseRequest extends FormRequest
     public function authorize(): bool
     {
         $user = Auth::user();
-        logger($user);
         if($user===null){
             return false;
         }

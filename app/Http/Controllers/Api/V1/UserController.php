@@ -5,58 +5,31 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\UserRequest;
 use App\Http\Resources\UserResource;
-use App\Models\User;
+use App\Responses\ErrorResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Services\UserService;
+use App\Exceptions\GlobalException;
+use App\Exceptions\InvalidPasswordException;
 
 class UserController extends Controller
 {
 
-      private function checkPassword(string $password,string $enteredPassword):bool
-      {
-        return Hash::check( $enteredPassword,$password);
-      }
+    private UserService $userService;
 
-      private function failureResponse(string $message='something went wrong')
-       {
-        return response()->json([
-                'status'=>'failure',
-                'message'=>$message,
-            ],422);
-      }
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
+    }
 
-      private function updateUserData(User $user,?string $email,?string $password)
-      {
-        $emailChanged = $this->isEmailChanged($email);
-        if($emailChanged){
-            if($password==null){
-                return $this->failureResponse('password is required to change email');
-            }
-            $isRightPassword = $this->checkPassword($user->password,$password);
-            
-            if(!$isRightPassword){
-                return $this->failureResponse('Password is Wrong');
-            }
-        }
-        return null;
-      }
 
-      private function isEmailChanged(?string $email) : bool {
-        if($email==null){return false;}
-        $userEmail = Auth::user()->email;
-        
-        return $email!=$userEmail;
-      }
-    
+
     /**
      * Display the specified resource.
      */
     public function show()
     {
-        $user = Auth::user();
-        logger($user);
+        $user = $this->userService->showUser();
         $resource = new UserResource($user);
         return response()->json($resource);
     }
@@ -66,87 +39,61 @@ class UserController extends Controller
      */
     public function update(UserRequest $request)
     {
-        $validated = $request->validated();
-        logger($validated);
-        $user = User::findOrFail(Auth::user()->id);
-        
-       $acceptUpdates = $this->updateUserData($user,$request['email'],$request->password);
-        if($acceptUpdates!=null){
-            return $acceptUpdates;
+        try {
+            $validated = $request->validated();
+            //?if success it will return bool
+            //?if not it will return failure response.
+            $result   = $this->userService->updateUser($validated);
+            return response()->json(
+                $result
+            );
+        } catch (GlobalException $e) {
+            return response()->json(ErrorResponse::somethingWentWrong(), 422);
+        } catch (InvalidPasswordException $e) {
+            return response()->json(ErrorResponse::wrongPassword(), 422);
         }
-          $updated = $user->update($validated);
-
-        if(!$updated){
-            return $this->failureResponse();
-        }
-        $user->refresh();
-        $updatedUser = new UserResource($user);
-        return response()->json(
-            $updatedUser
-        );
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Request $request)
     {
-        $validated = $request->validate(
-            ['password'=>'required']
-        );
+        try {
+            $validated = $request->validate(
+                ['password' => 'required']
+            );
 
-        $password = $validated['password'];
-        $user = User::findOrFail(Auth::user()->id);
-        $valid =$this->checkPassword($password,$user->password);
-        if(!$valid){
-             return response()->json([
-                        'status'=>'failure',
-                        'message'=>'password is wrong'
-                    ]);
-        }
-
-        $deleted = $user->delete();
-        if(!$deleted){
-            return $this->failureResponse();
-        }
-         return response()->json([
-                'status'=>'success',
-                'message'=>'user deleted'
+            $this->userService->destroyUser($validated['password']);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'user deleted'
             ]);
+        } catch (GlobalException $e) {
+            return response()->json(ErrorResponse::somethingWentWrong(), 422);
+        } catch (InvalidPasswordException $e) {
+            return response()->json(ErrorResponse::wrongPassword(), 422);
+        }
     }
 
 
-    public function change_password(Request $request) {
-    
-        //?validate
-        $validated = $request->validate(
-            [
-            'oldPassword'=>['required',Password::min(6)],
-            'newPassword'=>['required','confirmed',Password::min(6)],
-            ]
-        );
-        $user = User::findOrFail(Auth::user()->id);
-        $rightPassword = $this->checkPassword($user->password,$validated['oldPassword']);
-        if(!$rightPassword){
-            return $this->failureResponse('old password is wrong');
+    public function changePassword(Request $request)
+    {
+
+        try {  //?validate
+            $validated = $request->validate(
+                [
+                    'oldPassword' => ['required', Password::min(6)],
+                    'newPassword' => ['required', 'confirmed', Password::min(6), 'different:oldPassword'],
+                ]
+            );
+
+            $this->userService->changePassword(oldPassword: $validated['oldPassword'], newPassword: $validated['newPassword']);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'password changed successfully'
+            ]);
+        } catch (GlobalException $e) {
+            return response()->json(ErrorResponse::somethingWentWrong(), 422);
+        } catch (InvalidPasswordException $e) {
+            return response()->json(ErrorResponse::wrongOldPassword(), 422);
         }
-        Auth::user()->tokens()->delete(); // deletes the current token
-        $updatedPassword = $user->update(
-            [
-                'password'=>$validated['newPassword'],
-            ]
-        );
-        if(!$updatedPassword){
-            return $this->failureResponse();
-        }
-
-        
-
-
-        return response()->json([
-            'status'=>'success',
-            'message'=>'password changed successfully'
-        ]);
     }
-  
 }

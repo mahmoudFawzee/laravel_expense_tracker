@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use App\Responses\ErrorResponse;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -20,20 +21,18 @@ class LoginController extends Controller
         $gotUser = User::where('email', $request['email'])->first();
         if($gotUser==null){
             return response()->json(
-            ['status'=>'not found',
-            'message'=>'email does not exists',
-            
-            ],404);
+            ErrorResponse::emailNotExists()
+            ,422);
         }
         
         //?if yes check entered password
         $valid = Auth::attempt($credentials);
         if(!$valid){
-            return response()->json(
-            ['status'=>'forbidden',
-            'message'=>'password is wrong',
             
-            ],403);
+            return response()->json(
+            ErrorResponse::wrongPassword()
+            
+            ,403);
         }
 
         $user = Auth::user();
@@ -65,7 +64,6 @@ class LoginController extends Controller
     $user = Auth::user();
 
     if ($user) {
-        logger($user->currentAccessToken());
         $user->tokens()->delete(); // deletes all tokens
     }
 
