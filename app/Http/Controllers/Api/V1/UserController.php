@@ -47,10 +47,10 @@ class UserController extends Controller
             return response()->json(
                 $result
             );
-        } catch (GlobalException $e) {
-            return response()->json(ErrorResponse::somethingWentWrong(), 422);
         } catch (InvalidPasswordException $e) {
             return response()->json(ErrorResponse::wrongPassword(), 422);
+        } catch (GlobalException $e) {
+            return response()->json(ErrorResponse::somethingWentWrong(), 422);
         }
     }
 
@@ -66,10 +66,10 @@ class UserController extends Controller
                 'status' => 'success',
                 'message' => 'user deleted'
             ]);
-        } catch (GlobalException $e) {
-            return response()->json(ErrorResponse::somethingWentWrong(), 422);
         } catch (InvalidPasswordException $e) {
             return response()->json(ErrorResponse::wrongPassword(), 422);
+        } catch (GlobalException $e) {
+            return response()->json(ErrorResponse::somethingWentWrong(), 422);
         }
     }
 
@@ -90,10 +90,10 @@ class UserController extends Controller
                 'status' => 'success',
                 'message' => 'password changed successfully'
             ]);
-        } catch (GlobalException $e) {
-            return response()->json(ErrorResponse::somethingWentWrong(), 422);
         } catch (InvalidPasswordException $e) {
             return response()->json(ErrorResponse::wrongOldPassword(), 422);
+        } catch (GlobalException $e) {
+            return response()->json(ErrorResponse::somethingWentWrong(), 422);
         }
     }
 }

@@ -46,7 +46,7 @@ class UserService
     $isRightPassword = $this->checkPassword($password, $this->user->password);
 
     if (!$isRightPassword) {
-      throw new InvalidPasswordException("password: password is wrong");
+      throw new InvalidPasswordException(message: "password is wrong");
     }
   }
 
@@ -81,16 +81,20 @@ class UserService
     return $this->userRope->deleteUser();
   }
 
-  public function createUser(array $attributes): ?User
+  public function createUser(array $attributes): User
   {
-    return $this->userRope->createUser($attributes);
+    $user =  $this->userRope->createUser($attributes);
+    if ($user == null) {
+      throw new GlobalException();
+    }
+    return $user;
   }
 
   public function changePassword(string $oldPassword, string $newPassword)
   {
     $rightPassword = $this->checkPassword(enteredPassword: $oldPassword);
     if (!$rightPassword) {
-      throw new InvalidPasswordException("oldPassword: old password is wrong");
+      throw new InvalidPasswordException(field: "oldPassword", message: 'old password is wrong');
     }
     $updatedPassword = $this->user->update(
       [

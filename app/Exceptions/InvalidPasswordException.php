@@ -4,7 +4,11 @@ namespace App\Exceptions;
 
 use Exception;
 
-class InvalidPasswordException extends Exception
+class InvalidPasswordException extends GlobalException
 {
-    protected $message = 'The provided password is invalid.';
+    public function __construct(string $field = 'password', string $message = 'The provided password is invalid.')
+    {
+        $this->message = $message;
+        $this->field = $field;
+    }
 }

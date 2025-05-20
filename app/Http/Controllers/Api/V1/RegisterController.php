@@ -2,10 +2,8 @@
 namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
-use App\Models\User;
 use App\Responses\ErrorResponse;
 use App\Services\UserService;
-use Illuminate\Support\Facades\Hash;
 
 class RegisterController extends Controller
 {
